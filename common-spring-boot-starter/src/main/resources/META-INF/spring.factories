@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.github.dingey.common.util.CommonUtilAutoConfiguration,\
+  com.github.dingey.common.CommonAutoConfiguration
