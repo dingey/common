@@ -1,27 +1,20 @@
 package com.github.dingey.common;
 
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
-import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 
+@EnableCommon
 @Configuration
-@ConditionalOnClass(StringRedisTemplate.class)
-@AutoConfigureAfter(StringRedisTemplate.class)
 public class CommonAutoConfiguration {
-    @Resource
-    private StringRedisTemplate srt;
+    private static final Logger log = LoggerFactory.getLogger(CommonAutoConfiguration.class);
 
-    @Bean
-    public RedisCacheAspect redisCacheAspect() {
-        return new RedisCacheAspect(srt);
-    }
-
-    @Bean
-    public RedisLockAspect redisLockAspect() {
-        return new RedisLockAspect(srt);
+    @PostConstruct
+    public void init() {
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Common Service");
+        }
     }
 }

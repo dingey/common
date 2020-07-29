@@ -1,11 +1,11 @@
 package com.github.dingey.common.util;
 
 import com.github.dingey.common.exception.EncryptException;
+import org.springframework.util.DigestUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -25,7 +25,7 @@ public class EncryptUtil {
     public static String md5(String plainText) {
         try {
             byte[] secretBytes = MessageDigest.getInstance("md5").digest(plainText.getBytes(StandardCharsets.UTF_8));
-            return new BigInteger(1, secretBytes).toString(16);
+            return DigestUtils.md5DigestAsHex(secretBytes);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -117,6 +117,10 @@ public class EncryptUtil {
 
     /**
      * AES 解密操作
+     *
+     * @param content 密文内容
+     * @param key     密钥
+     * @return AES明文内容
      */
     public static String decryptAES(String content, String key) {
         try {
@@ -205,9 +209,14 @@ public class EncryptUtil {
      * @param data 待加密数据
      * @param key  密钥
      * @return byte[] 加密数据
+     * @throws EncryptException 异常
      */
-    public static byte[] encryptByPublicKey(byte[] data, byte[] key) throws Exception {
-        return decryptByPublic(data, key, Cipher.ENCRYPT_MODE);
+    public static byte[] encryptByPublicKey(byte[] data, byte[] key) throws EncryptException {
+        try {
+            return decryptByPublic(data, key, Cipher.ENCRYPT_MODE);
+        } catch (Exception e) {
+            throw new EncryptException(e);
+        }
     }
 
     private static byte[] decryptByPublic(byte[] data, byte[] key, int decryptMode) throws Exception {

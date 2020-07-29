@@ -1,4 +1,4 @@
-package com.github.dingey.common;
+package com.github.dingey.common.cache;
 
 import com.github.dingey.common.annotation.RedisCache;
 import com.github.dingey.common.util.AspectUtil;
@@ -10,9 +10,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
@@ -25,15 +23,15 @@ import java.util.concurrent.TimeUnit;
  * redis锁
  */
 @Aspect
-@Component
 class RedisCacheAspect {
     private final Logger log = LoggerFactory.getLogger(RedisCacheAspect.class);
     private final StringRedisTemplate srt;
     private final static long WAIT_TIMEOUT = 1000L;
+    private final LocalCache<String, Object> cache;
 
-    @Autowired
-    public RedisCacheAspect(StringRedisTemplate srt) {
+    RedisCacheAspect(StringRedisTemplate srt, LocalCache<String, Object> localCache) {
         this.srt = srt;
+        this.cache = localCache;
     }
 
     @Pointcut(value = "@annotation(redisCache)", argNames = "redisCache")
@@ -49,8 +47,8 @@ class RedisCacheAspect {
         if (StringUtils.isEmpty(key)) {
             key = String.format("%s:%s:%s", method.getDeclaringClass().getName().replace(".", ":"), method.getName(), JsonUtil.toJson(pjp.getArgs()));
         }
-        if (Objects.equals(srt.hasKey(key), true)) {
-            return getFromCache(key, method.getReturnType());
+        if (hasKey(key, redisCache.local())) {
+            return getFromCache(key, method.getReturnType(), redisCache.local());
         } else {
             Object result;
             if (!redisCache.cacheResult()) {
@@ -59,8 +57,8 @@ class RedisCacheAspect {
             if (redisCache.sync()) {
                 boolean b = setLock(key);
                 if (b) {
-                    if (Objects.equals(srt.hasKey(key), true)) {
-                        return getFromCache(key, method.getReturnType());
+                    if (hasKey(key, redisCache.local())) {
+                        return getFromCache(key, method.getReturnType(), false);
                     } else {
                         result = pjp.proceed();
                     }
@@ -76,7 +74,7 @@ class RedisCacheAspect {
             if (StringUtils.isEmpty(redisCache.condition()) || AspectUtil.spel(pjp, redisCache.condition(), boolean.class, args)) {
                 if (StringUtils.isEmpty(redisCache.unless()) || !AspectUtil.spel(pjp, redisCache.unless(), boolean.class, args)) {
                     String s = JsonUtil.toJson(result);
-                    srt.opsForValue().setIfAbsent(key, s, redisCache.expire(), TimeUnit.SECONDS);
+                    cacheResult(key, s, redisCache.expire(), redisCache.local());
                     log.debug("满足缓存条件，缓存数据,key是{},value:{}", key, s);
                 }
             }
@@ -84,14 +82,32 @@ class RedisCacheAspect {
         }
     }
 
+    private boolean hasKey(String key, boolean caffeine) {
+        if (!caffeine) {
+            return Objects.equals(srt.hasKey(key), true);
+        }
+        boolean hasKey = cache.hasKey(key);
+        if (!hasKey) {
+            hasKey = Objects.equals(srt.hasKey(key), true);
+        }
+        return hasKey;
+    }
+
+    private void cacheResult(String key, String value, long expire, boolean localCache) {
+        srt.opsForValue().setIfAbsent(key, value, expire, TimeUnit.SECONDS);
+        if (localCache) {
+            cache.set(key, value, expire);
+        }
+    }
+
     private Object tryWaitUntilCacheed(String key, Method method) {
         log.debug("等待其他应用更新缓存，key是{}", key);
         long l = System.currentTimeMillis();
-        boolean hasKey = Objects.equals(srt.hasKey(key), true);
+        boolean hasKey = hasKey(key, false);
         while (!hasKey) {
             try {
                 Thread.sleep(10L);
-                hasKey = Objects.equals(srt.hasKey(key), true);
+                hasKey = hasKey(key, false);
                 if (System.currentTimeMillis() - l > WAIT_TIMEOUT) {
                     log.debug("等待其他应用更新缓存超时，key是{}", key);
                     return null;
@@ -102,15 +118,24 @@ class RedisCacheAspect {
                 return true;
             }
         }
-        return getFromCache(key, method.getReturnType());
+        return getFromCache(key, method.getReturnType(), false);
     }
 
     private boolean setLock(String key) {
         return Objects.equals(srt.opsForValue().setIfAbsent("LOCK:" + key, "0", 9000L, TimeUnit.MILLISECONDS), true);
     }
 
-    private Object getFromCache(String key, Class<?> type) {
-        String s = srt.opsForValue().get(key);
+    private Object getFromCache(String key, Class<?> type, boolean localCache) {
+        String s = null;
+        if (localCache && cache != null) {
+            s = (String) cache.get(key);
+        }
+        if (StringUtils.isEmpty(s)) {
+            s = srt.opsForValue().get(key);
+            if (cache != null) {
+                cache.set(key,s);
+            }
+        }
         return JsonUtil.parseJson(s, type);
     }
 }

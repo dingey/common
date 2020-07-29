@@ -52,7 +52,7 @@ public class JsonUtil {
     /**
      * 转换成java包装类对象
      * <pre>
-     * List<Person> pp3 = mapper.parseJson(json, new TypeReference<List<Person>>() {});
+     * List&lt;Person&gt; pp3 = mapper.parseJson(json, new TypeReference&lt;List&lt;Person&gt;&gt;() {});
      * </pre>
      *
      * @param json         json字符串
@@ -67,9 +67,5 @@ public class JsonUtil {
         } catch (IOException e) {
             throw new JsonException(e);
         }
-    }
-
-    public static void main(String[] args) {
-
     }
 }

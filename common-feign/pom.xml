@@ -8,23 +8,16 @@
         <version>0.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>common-spring-boot-starter</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>common-feign</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.github.dingey</groupId>
-            <artifactId>common-service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <optional>true</optional>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

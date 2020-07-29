@@ -54,7 +54,7 @@ public @interface RedisCache {
     boolean cacheResult() default true;
 
     /**
-     * 存在熔断是否缓存结果
+     * 是否支持本地缓存
      */
-    boolean cacheFallback() default false;
+    boolean local() default false;
 }

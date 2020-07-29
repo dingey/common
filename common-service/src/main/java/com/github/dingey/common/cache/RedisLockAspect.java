@@ -1,7 +1,7 @@
-package com.github.dingey.common;
+package com.github.dingey.common.cache;
 
-import com.github.dingey.common.exception.RedisLockException;
 import com.github.dingey.common.annotation.RedisLock;
+import com.github.dingey.common.exception.RedisLockException;
 import com.github.dingey.common.util.AspectUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -10,13 +10,9 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -26,8 +22,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@ConditionalOnBean(RedisTemplate.class)
-@Component
 @Aspect
 @Order(1)
 class RedisLockAspect {
@@ -45,8 +39,7 @@ class RedisLockAspect {
         log.debug("redis锁初始化完成");
     }
 
-    @Autowired
-    public RedisLockAspect(StringRedisTemplate srt) {
+    RedisLockAspect(StringRedisTemplate srt) {
         this.srt = srt;
     }
 
