@@ -1,6 +1,6 @@
 package com.github.dingey.common;
 
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings({"unused"})
 public class Result<T> {
     private int code;
     private String msg;
@@ -16,15 +16,15 @@ public class Result<T> {
         this.data = data;
     }
 
-    public static <T> Result success(T data) {
-        return new Result(0, null, data);
+    public static <T> Result<T> success(T data) {
+        return new Result<>(0, null, data);
     }
 
     public int getCode() {
         return code;
     }
 
-    public Result setCode(int code) {
+    public Result<T> setCode(int code) {
         this.code = code;
         return this;
     }
@@ -33,7 +33,7 @@ public class Result<T> {
         return msg;
     }
 
-    public Result setMsg(String msg) {
+    public Result<T> setMsg(String msg) {
         this.msg = msg;
         return this;
     }
@@ -42,7 +42,7 @@ public class Result<T> {
         return data;
     }
 
-    public Result setData(T data) {
+    public Result<T> setData(T data) {
         this.data = data;
         return this;
     }

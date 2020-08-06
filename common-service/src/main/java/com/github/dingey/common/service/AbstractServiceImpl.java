@@ -1,5 +1,6 @@
 package com.github.dingey.common.service;
 
+import com.github.dingey.common.Pager;
 import com.github.dingey.mybatis.mapper.BaseMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageSerializable;
@@ -95,8 +96,9 @@ public abstract class AbstractServiceImpl<D extends BaseMapper<T>, T> implements
     }
 
     @Override
-    public PageSerializable<T> page(T t, int pageNum, int pageSize) {
+    public Pager<T> page(T t, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        return new PageSerializable<>(mapper.list(t));
+        PageSerializable<T> page = new PageSerializable<>(mapper.list(t));
+        return Pager.of(page);
     }
 }

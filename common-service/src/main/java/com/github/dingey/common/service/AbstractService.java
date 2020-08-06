@@ -1,6 +1,6 @@
 package com.github.dingey.common.service;
 
-import com.github.pagehelper.PageSerializable;
+import com.github.dingey.common.Pager;
 
 import java.io.Serializable;
 import java.util.List;
@@ -116,5 +116,5 @@ public interface AbstractService<T> {
      * @param pageSize 大小
      * @return 分页数据
      */
-    PageSerializable<T> page(T t, int pageNum, int pageSize);
+    Pager<T> page(T t, int pageNum, int pageSize);
 }
