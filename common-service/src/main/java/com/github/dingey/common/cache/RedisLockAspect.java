@@ -34,6 +34,8 @@ class RedisLockAspect {
 
     private ThreadLocal<String> lockValue = new ThreadLocal<>();
 
+    private static final long DEFAULT_LOCK_TIME = 1000L;
+
     @PostConstruct
     public void init() {
         log.debug("redis锁初始化完成");
@@ -107,7 +109,7 @@ class RedisLockAspect {
             value = UUID.randomUUID().toString().replaceAll("-", "");
             lockValue.set(value);
         }
-        boolean setIfAbsent = Objects.equals(srt.opsForValue().setIfAbsent(key, value, lockMillisecond, TimeUnit.MILLISECONDS), true);
+        boolean setIfAbsent = Objects.equals(srt.opsForValue().setIfAbsent(key, value, lockMillisecond > 0L ? lockMillisecond : DEFAULT_LOCK_TIME, TimeUnit.MILLISECONDS), true);
         if (!setIfAbsent) {
             if (value.equals(srt.opsForValue().get(key))) {
                 srt.expire(key, lockMillisecond, TimeUnit.MILLISECONDS);

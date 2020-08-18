@@ -16,6 +16,17 @@ public class JsonUtil {
         JsonUtil.objectMapper = objectMapper;
     }
 
+    private static ObjectMapper getObjectMapper() {
+        if (objectMapper == null) {
+            synchronized (JsonUtil.class) {
+                if (objectMapper == null) {
+                    objectMapper = new ObjectMapper();
+                }
+            }
+        }
+        return objectMapper;
+    }
+
     /**
      * 转换成json字符串
      *
@@ -26,7 +37,7 @@ public class JsonUtil {
      */
     public static <T> String toJson(T value) throws JsonException {
         try {
-            return objectMapper.writeValueAsString(value);
+            return getObjectMapper().writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw new JsonException(e);
         }
@@ -43,7 +54,7 @@ public class JsonUtil {
      */
     public static <T> T parseJson(String json, Class<T> valueType) throws JsonException {
         try {
-            return objectMapper.readValue(json, valueType);
+            return getObjectMapper().readValue(json, valueType);
         } catch (IOException e) {
             throw new JsonException(e);
         }
@@ -63,7 +74,7 @@ public class JsonUtil {
      */
     public static <T> T parseJson(String json, TypeReference<T> valueTypeRef) throws JsonException {
         try {
-            return objectMapper.readValue(json, valueTypeRef);
+            return getObjectMapper().readValue(json, valueTypeRef);
         } catch (IOException e) {
             throw new JsonException(e);
         }

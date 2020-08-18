@@ -1,7 +1,10 @@
 package com.github.dingey.common;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @SuppressWarnings({"unused"})
 public class Result<T> {
+    @ApiModelProperty("0成功|1失败|2服务器异常")
     private int code;
     private String msg;
     private T data;
@@ -18,6 +21,14 @@ public class Result<T> {
 
     public static <T> Result<T> success(T data) {
         return new Result<>(0, null, data);
+    }
+
+    public static <T> Result<T> fail(String msg) {
+        return new Result<>(1, msg, null);
+    }
+
+    public static <T> Result<T> error(String msg) {
+        return new Result<>(2, msg, null);
     }
 
     public int getCode() {
