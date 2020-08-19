@@ -1,6 +1,6 @@
 package com.github.dingey.common.exception;
 
-public class RedisLockException extends RuntimeException {
+public class RedisLockException extends CommonException {
 
     public RedisLockException(String message) {
         super(message);

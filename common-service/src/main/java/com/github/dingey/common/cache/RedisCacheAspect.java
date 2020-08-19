@@ -41,9 +41,16 @@ class RedisCacheAspect {
     @Around(value = "pointcut(redisCache)", argNames = "pjp,redisCache")
     public Object around(ProceedingJoinPoint pjp, RedisCache redisCache) throws Throwable {
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
-        String key = (StringUtils.isEmpty(redisCache.cacheName()) ? redisCache.value() : redisCache.cacheName()) +
-                (StringUtils.hasText(redisCache.key()) ? ":" : "") +
-                (StringUtils.hasText(redisCache.key()) ? AspectUtil.spel(pjp, redisCache.key(), String.class) : "");
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.hasText(redisCache.cacheName())) {
+            sb.append(redisCache.cacheName()).append(":");
+        }
+        if (StringUtils.hasText(redisCache.key())) {
+            sb.append(AspectUtil.spel(pjp, redisCache.key(), String.class));
+        } else if (StringUtils.hasText(redisCache.value())) {
+            sb.append(AspectUtil.spel(pjp, redisCache.value(), String.class));
+        }
+        String key = sb.toString();
         if (StringUtils.isEmpty(key)) {
             key = String.format("%s:%s:%s", method.getDeclaringClass().getName().replace(".", ":"), method.getName(), JsonUtil.toJson(pjp.getArgs()));
         }

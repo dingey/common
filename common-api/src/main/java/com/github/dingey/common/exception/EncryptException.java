@@ -1,6 +1,6 @@
 package com.github.dingey.common.exception;
 
-public class EncryptException extends RuntimeException {
+public class EncryptException extends CommonException {
     public EncryptException() {
     }
 
