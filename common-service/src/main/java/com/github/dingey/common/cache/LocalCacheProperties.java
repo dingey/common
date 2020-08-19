@@ -7,6 +7,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 @ConfigurationProperties(prefix = "common.cache.local")
 public class LocalCacheProperties {
     /**
+     * 是否启动本地缓存
+     */
+    private boolean enable = false;
+    /**
      * 默认过期时间：秒
      */
     private long expire = 60L;

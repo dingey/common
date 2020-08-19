@@ -2,6 +2,7 @@ package com.github.dingey.common.cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @EnableConfigurationProperties(LocalCacheProperties.class)
+@ConditionalOnProperty(value = "common.cache.local.enable", havingValue = "true")
 @ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Cache")
 class LocalCacheAutoConfiguration {
     @Autowired
