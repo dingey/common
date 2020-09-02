@@ -10,7 +10,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class JsonUtil {
 
-    private static ObjectMapper objectMapper;
+    private static volatile ObjectMapper objectMapper;
 
     JsonUtil(ObjectMapper objectMapper) {
         JsonUtil.objectMapper = objectMapper;
@@ -79,4 +79,6 @@ public class JsonUtil {
             throw new JsonException(e);
         }
     }
+
+
 }
