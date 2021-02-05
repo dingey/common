@@ -22,8 +22,4 @@ public @interface RedisEvict {
      * 方法执行前清除缓存
      */
     boolean beforeInvocation() default false;
-    /**
-     * 是否支持本地缓存
-     */
-    boolean local() default false;
 }

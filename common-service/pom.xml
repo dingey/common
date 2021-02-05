@@ -5,14 +5,14 @@
     <parent>
         <artifactId>common</artifactId>
         <groupId>com.github.dingey</groupId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>common-service</artifactId>
     <dependencies>
         <dependency>
             <groupId>com.github.dingey</groupId>
-            <artifactId>common-api</artifactId>
+            <artifactId>common-feign</artifactId>
         </dependency>
 
         <dependency>
@@ -39,12 +39,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <optional>true</optional>
-            <version>2.7.0</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -79,12 +73,63 @@
         <dependency>
             <groupId>com.github.dingey</groupId>
             <artifactId>mybatis-mapper</artifactId>
-            <version>0.2.8</version>
+            <version>0.4.1</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.ribbon</groupId>
+            <artifactId>ribbon-loadbalancer</artifactId>
+            <version>2.3.0</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+            <version>2.1.0.RELEASE</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.hystrix</groupId>
+            <artifactId>hystrix-core</artifactId>
+            <version>1.5.18</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.ribbon</groupId>
+            <artifactId>ribbon-core</artifactId>
+            <version>2.3.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+            <version>10.1.0</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.netflix.ribbon</groupId>
+            <artifactId>ribbon-eureka</artifactId>
+            <version>2.3.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.eureka</groupId>
+            <artifactId>eureka-client</artifactId>
+            <version>1.7.2</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>2.6.9</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

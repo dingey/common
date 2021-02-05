@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings({"unchecked", "unused"})
-public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends BaseService> extends AbstractServiceImpl<D, T> implements BaseService<T, S> {
+@SuppressWarnings({"unused"})
+public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends BaseService<T,S>> extends AbstractServiceImpl<D, T> implements BaseService<T, S> {
     @Autowired
     private S service;
 
@@ -20,7 +20,7 @@ public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends Base
         }
         List<T> list = new ArrayList<>();
         for (Serializable id : ids) {
-            T t = (T) service.getCache(id);
+            T t = service.getCache(id);
             if (t != null) {
                 list.add(t);
             }
@@ -34,6 +34,6 @@ public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends Base
      * @return 代理对象
      */
     public S self() {
-        return (S) service;
+        return service;
     }
 }

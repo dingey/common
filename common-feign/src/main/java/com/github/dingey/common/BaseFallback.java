@@ -15,10 +15,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "unused"})
 public abstract class BaseFallback {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private static final HashMap<Class, PropertyDescriptor> genericProp = new HashMap<>();
+    private static final HashMap<Class<?>, PropertyDescriptor> genericProp = new HashMap<>();
 
     public <T> T fallback(Object... args) {
         error(args);
@@ -46,7 +46,9 @@ public abstract class BaseFallback {
         StackTraceElement trace = getErrorTrace();
         String methodName = trace.getMethodName();
         Class<Object> existingClass = ClassUtils.getExistingClass(this.getClass().getClassLoader(), trace.getClassName());
-        log.error("服务被熔断，类名：{} 方法：{} 参数：{} 原因：{}", getName(existingClass), methodName, args, cause == null ? "" : cause.getMessage());
+        if (log.isDebugEnabled()) {
+            log.error("服务被熔断，类名：{} 方法：{} 参数：{} 原因：{}", getName(existingClass), methodName, args, cause == null ? "" : cause.getMessage());
+        }
     }
 
     private String getName(Class<?> clazz) {
@@ -75,13 +77,13 @@ public abstract class BaseFallback {
                         o = Collections.emptyList();
                     } else {
                         o = ClassUtils.newInstance(m.getReturnType());
-                        Object pa = ClassUtils.newInstance((Class) subType.getRawType());
+                        Object pa = ClassUtils.newInstance((Class<?>) subType.getRawType());
                         setGenericProp(o, o.getClass(), pa);
                     }
                 } else if (type instanceof List) {
                     o = Collections.emptyList();
                 } else {
-                    o = ClassUtils.newInstance((Class) type);
+                    o = ClassUtils.newInstance((Class<?>) type);
                 }
                 break;
             }
@@ -89,7 +91,7 @@ public abstract class BaseFallback {
         return o;
     }
 
-    private void setGenericProp(Object o, Class valueClass, Object value) {
+    private void setGenericProp(Object o, Class<?> valueClass, Object value) {
         if (genericProp.containsKey(o.getClass())) {
             PropertyDescriptor propertyDescriptor = genericProp.get(o.getClass());
             if (propertyDescriptor != null) {

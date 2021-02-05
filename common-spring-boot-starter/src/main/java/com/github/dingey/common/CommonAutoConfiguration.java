@@ -13,7 +13,7 @@ public class CommonAutoConfiguration {
 
     @PostConstruct
     public void init() {
-        if (log.isDebugEnabled()) {
+        if (log.isInfoEnabled()) {
             log.debug("Initializing Common Service");
         }
     }

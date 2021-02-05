@@ -10,13 +10,13 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,11 +27,22 @@ class RedisCacheAspect {
     private final Logger log = LoggerFactory.getLogger(RedisCacheAspect.class);
     private final StringRedisTemplate srt;
     private final static long WAIT_TIMEOUT = 1000L;
-    private final LocalCache<String, Object> cache;
+    private volatile Map<String, ExpireValue<Object>> cache;
+    @Value("${common.local.cache.size:10}")
+    private int capacity;
 
-    RedisCacheAspect(StringRedisTemplate srt, LocalCache<String, Object> localCache) {
+    RedisCacheAspect(StringRedisTemplate srt) {
         this.srt = srt;
-        this.cache = localCache;
+    }
+
+    @PostConstruct
+    public void init() {
+        this.cache = new LinkedHashMap<String, ExpireValue<Object>>() {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return size() > capacity;
+            }
+        };
     }
 
     @Pointcut(value = "@annotation(redisCache)", argNames = "redisCache")
@@ -41,14 +52,24 @@ class RedisCacheAspect {
     @Around(value = "pointcut(redisCache)", argNames = "pjp,redisCache")
     public Object around(ProceedingJoinPoint pjp, RedisCache redisCache) throws Throwable {
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
-        String key = (StringUtils.isEmpty(redisCache.cacheName()) ? redisCache.value() : redisCache.cacheName()) +
-                (StringUtils.hasText(redisCache.key()) ? ":" : "") +
-                (StringUtils.hasText(redisCache.key()) ? AspectUtil.spel(pjp, redisCache.key(), String.class) : "");
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.hasText(redisCache.cacheName())) {
+            sb.append(redisCache.cacheName()).append(":");
+        }
+        if (StringUtils.hasText(redisCache.key())) {
+            sb.append(AspectUtil.spel(pjp, redisCache.key(), String.class));
+        } else if (StringUtils.hasText(redisCache.value())) {
+            sb.append(AspectUtil.spel(pjp, redisCache.value(), String.class));
+        }
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ':') {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        String key = sb.toString();
         if (StringUtils.isEmpty(key)) {
             key = String.format("%s:%s:%s", method.getDeclaringClass().getName().replace(".", ":"), method.getName(), JsonUtil.toJson(pjp.getArgs()));
         }
-        if (hasKey(key, redisCache.local())) {
-            return getFromCache(key, method.getReturnType(), redisCache.local());
+        if (hasKey(key)) {
+            return getFromCache(key, method.getReturnType(), redisCache);
         } else {
             Object result;
             if (!redisCache.cacheResult()) {
@@ -57,57 +78,58 @@ class RedisCacheAspect {
             if (redisCache.sync()) {
                 boolean b = setLock(key);
                 if (b) {
-                    if (hasKey(key, redisCache.local())) {
-                        return getFromCache(key, method.getReturnType(), false);
+                    if (hasKey(key)) {
+                        return getFromCache(key, method.getReturnType(), redisCache);
                     } else {
                         result = pjp.proceed();
                     }
                 } else {
-                    return tryWaitUntilCacheed(key, method);
+                    return tryWaitUntilCached(key, method, redisCache);
                 }
             } else {
                 result = pjp.proceed();
             }
 
-            Map<String, Object> args = new HashMap<>();
-            args.put("result", result);
-            if (StringUtils.isEmpty(redisCache.condition()) || AspectUtil.spel(pjp, redisCache.condition(), boolean.class, args)) {
-                if (StringUtils.isEmpty(redisCache.unless()) || !AspectUtil.spel(pjp, redisCache.unless(), boolean.class, args)) {
-                    String s = JsonUtil.toJson(result);
-                    cacheResult(key, s, redisCache.expire(), redisCache.local());
-                    log.debug("满足缓存条件，缓存数据,key是{},value:{}", key, s);
+            if (redisCache.cacheResult()) {
+                Map<String, Object> args = Collections.singletonMap("result", result);
+                if (StringUtils.isEmpty(redisCache.condition()) || AspectUtil.spel(pjp, redisCache.condition(), boolean.class, args)) {
+                    if (StringUtils.isEmpty(redisCache.unless()) || !AspectUtil.spel(pjp, redisCache.unless(), boolean.class, args)) {
+                        cacheResult(key, result, redisCache);
+                    }
                 }
             }
             return result;
         }
     }
 
-    private boolean hasKey(String key, boolean caffeine) {
-        if (!caffeine) {
-            return Objects.equals(srt.hasKey(key), true);
-        }
-        boolean hasKey = cache.hasKey(key);
+    private boolean hasKey(String key) {
+        boolean hasKey = hasLocal(key, System.currentTimeMillis());
         if (!hasKey) {
             hasKey = Objects.equals(srt.hasKey(key), true);
         }
         return hasKey;
     }
 
-    private void cacheResult(String key, String value, long expire, boolean localCache) {
-        srt.opsForValue().setIfAbsent(key, value, expire, TimeUnit.SECONDS);
-        if (localCache) {
-            cache.set(key, value, expire);
+    private void cacheResult(String key, Object value, RedisCache redisCache) {
+        String json = JsonUtil.toJson(value);
+        srt.opsForValue().setIfAbsent(key, json, redisCache.expire(), TimeUnit.SECONDS);
+        if (log.isDebugEnabled()) {
+            log.debug("满足缓存条件，缓存数据,key是{},value:{}", key, json);
+        }
+        if (redisCache.local() > 0L) {
+            log.debug("缓存数据到本地环境,key是{},value:{}", key, json);
+            cache.put(key, new ExpireValue<>(1000 * redisCache.local() + System.currentTimeMillis(), value));
         }
     }
 
-    private Object tryWaitUntilCacheed(String key, Method method) {
+    private Object tryWaitUntilCached(String key, Method method, RedisCache redisCache) {
         log.debug("等待其他应用更新缓存，key是{}", key);
         long l = System.currentTimeMillis();
-        boolean hasKey = hasKey(key, false);
+        boolean hasKey = hasKey(key);
         while (!hasKey) {
             try {
                 Thread.sleep(10L);
-                hasKey = hasKey(key, false);
+                hasKey = hasKey(key);
                 if (System.currentTimeMillis() - l > WAIT_TIMEOUT) {
                     log.debug("等待其他应用更新缓存超时，key是{}", key);
                     return null;
@@ -118,24 +140,54 @@ class RedisCacheAspect {
                 return true;
             }
         }
-        return getFromCache(key, method.getReturnType(), false);
+        return getFromCache(key, method.getReturnType(), redisCache);
     }
 
     private boolean setLock(String key) {
         return Objects.equals(srt.opsForValue().setIfAbsent("LOCK:" + key, "0", 9000L, TimeUnit.MILLISECONDS), true);
     }
 
-    private Object getFromCache(String key, Class<?> type, boolean localCache) {
-        String s = null;
-        if (localCache && cache != null) {
-            s = (String) cache.get(key);
+    private Object getFromCache(String key, Class<?> type, RedisCache redisCache) {
+        long now = System.currentTimeMillis();
+        if (redisCache.local() > 0L && hasLocal(key, now)) {
+            return cache.get(key).getData();
         }
-        if (StringUtils.isEmpty(s)) {
-            s = srt.opsForValue().get(key);
-            if (cache != null) {
-                cache.set(key,s);
-            }
+        String s = srt.opsForValue().get(key);
+        Object o = JsonUtil.parseJson(s, type);
+        if (redisCache.local() > 0L) {
+            log.debug("缓存数据到本地环境,key是{},value:{}", key, s);
+            cache.put(key, new ExpireValue<>(1000 * redisCache.expire() + now, s));
         }
-        return JsonUtil.parseJson(s, type);
+        return o;
     }
+
+    private boolean hasLocal(String key, long expire) {
+        ExpireValue<Object> expireValue = cache.get(key);
+        if (expireValue != null && expireValue.getExpire() > expire) {
+            return true;
+        } else if (expireValue != null && expireValue.getExpire() < expire) {
+            log.debug("本地缓存已过期,key是{}", key);
+            cache.remove(key);
+        }
+        return false;
+    }
+
+    static class ExpireValue<T> {
+        private final long expire;
+        private final T data;
+
+        public ExpireValue(long expire, T data) {
+            this.expire = expire;
+            this.data = data;
+        }
+
+        public long getExpire() {
+            return expire;
+        }
+
+        public T getData() {
+            return data;
+        }
+    }
+
 }

@@ -18,11 +18,9 @@ import org.springframework.util.StringUtils;
 class RedisEvictAspect {
     private final Logger log = LoggerFactory.getLogger(RedisEvictAspect.class);
     private final StringRedisTemplate srt;
-    private final LocalCache<String, Object> cache;
 
-    RedisEvictAspect(StringRedisTemplate srt, LocalCache<String, Object> localCache) {
+    RedisEvictAspect(StringRedisTemplate srt) {
         this.srt = srt;
-        this.cache = localCache;
     }
 
     @Pointcut(value = "@annotation(redisEvict)", argNames = "redisEvict")
@@ -49,10 +47,6 @@ class RedisEvictAspect {
             String key = value.contains("#") ? AspectUtil.spel(pjp, value, String.class) : value;
             srt.delete(key);
             log.debug("清除redis缓存数据,key是{}", key);
-            if (redisEvict.local() && cache.hasKey(key)) {
-                cache.delete(key);
-                log.debug("清除本地缓存数据,key是{}", key);
-            }
         }
     }
 }

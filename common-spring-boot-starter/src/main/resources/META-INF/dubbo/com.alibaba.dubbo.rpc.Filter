@@ -1,0 +1,2 @@
+dubboProviderContextFilter=com.github.dingey.common.context.GlobalContextProviderFilter
+dubboConsumerContextFilter=com.github.dingey.common.context.GlobalContextConsumerFilter

@@ -1,5 +1,6 @@
 package com.github.dingey.common.service;
 
+import com.github.dingey.common.Pager;
 import com.github.pagehelper.PageSerializable;
 
 import java.io.Serializable;
@@ -45,7 +46,7 @@ public interface AbstractService<T> {
      * @param entity 查询对象
      * @return 记录数
      */
-    Integer count(T entity);
+    Long count(T entity);
 
     /**
      * 查询所有
@@ -67,7 +68,7 @@ public interface AbstractService<T> {
      *
      * @return 总记录数
      */
-    int countAll();
+    long countAll();
 
     /**
      * 插入记录

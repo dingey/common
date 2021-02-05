@@ -18,13 +18,13 @@ public abstract class AbstractServiceImpl<D extends BaseMapper<T>, T> implements
 
     @Override
     public T get(Serializable id) {
-        return mapper.get(id);
+        return mapper.getById(id);
     }
 
     @Cacheable(cacheNames = "common", key = "#root.targetClass.simpleName+':'+#id")//, unless = "#result == null")
     @Override
     public T getCache(Serializable id) {
-        return mapper.get(id);
+        return mapper.getById(id);
     }
 
     public T get(T t) {
@@ -44,7 +44,7 @@ public abstract class AbstractServiceImpl<D extends BaseMapper<T>, T> implements
     }
 
     @Override
-    public Integer count(T entity) {
+    public Long count(T entity) {
         return mapper.count(entity);
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractServiceImpl<D extends BaseMapper<T>, T> implements
     }
 
     @Override
-    public int countAll() {
+    public long countAll() {
         return mapper.countAll();
     }
 
@@ -85,13 +85,13 @@ public abstract class AbstractServiceImpl<D extends BaseMapper<T>, T> implements
 
     @Override
     public int delete(Serializable id) {
-        return mapper.delete(id);
+        return mapper.deleteById(id);
     }
 
-    @CacheEvict(cacheNames = "base", key = "#root.targetClass.simpleName+':'+#entity.id", condition = "#id>0 && #result>0")
+    @CacheEvict(cacheNames = "base", key = "#root.targetClass.simpleName+':'+#id", condition = "#id>0 && #result>0")
     @Override
     public int deleteCache(Serializable id) {
-        return 0;
+        return mapper.deleteById(id);
     }
 
     @Override

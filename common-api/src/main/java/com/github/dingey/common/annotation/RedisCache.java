@@ -38,7 +38,7 @@ public @interface RedisCache {
     String unless() default "";
 
     /**
-     * 是否异步
+     * 是否同步
      * 如果有多个线程，则同步底层方法的调用
      */
     boolean sync() default false;
@@ -46,7 +46,7 @@ public @interface RedisCache {
     /**
      * 过期时间,单位 秒, 默认600秒
      */
-    long expire() default 600;
+    long expire() default 600L;
 
     /**
      * 如果缓存不存在，是否缓存执行结果
@@ -54,7 +54,7 @@ public @interface RedisCache {
     boolean cacheResult() default true;
 
     /**
-     * 是否支持本地缓存
+     * 本地缓存过期时间，单位 秒, 0不开启本地缓存
      */
-    boolean local() default false;
+    long local() default 0L;
 }
