@@ -132,6 +132,18 @@
             <version>2.6.9</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>5.1.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>5.1.0</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 
