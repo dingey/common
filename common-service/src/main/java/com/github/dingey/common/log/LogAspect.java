@@ -21,7 +21,7 @@ import java.util.Objects;
 
 @Aspect
 @Component
-@ConditionalOnClass({HttpServletRequest.class})
+@ConditionalOnClass({HttpServletRequest.class, ProceedingJoinPoint.class})
 public class LogAspect {
     @Resource
     private ObjectMapper objectMapper;

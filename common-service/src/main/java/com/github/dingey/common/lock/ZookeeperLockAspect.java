@@ -55,19 +55,31 @@ public class ZookeeperLockAspect {
             Method method = ((MethodSignature) pjp.getSignature()).getMethod();
             String key = zookeeperLock.value().isEmpty() ? (method.getDeclaringClass().getName() + "." + method.getName()) : AspectUtil.spel(pjp, zookeeperLock.value(), String.class);
 
+            if (log.isDebugEnabled()) {
+                log.debug("zookeeper锁{}，满足加锁条件", key);
+            }
             InterProcessLock lock = new InterProcessMutex(curatorFramework, key);
             try {
                 if (zookeeperLock.timeout() > 0L) {
                     if (lock.acquire(zookeeperLock.timeout(), TimeUnit.MILLISECONDS)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("zookeeper锁{}，加锁成功{}", key, zookeeperLock.timeout());
+                        }
                         return pjp.proceed();
                     }
                 } else {
                     lock.acquire();
+                    if (log.isDebugEnabled()) {
+                        log.debug("zookeeper锁{}，加锁成功{}", key, zookeeperLock.timeout());
+                    }
                     return pjp.proceed();
                 }
             } finally {
                 if (lock.isAcquiredInThisProcess()) {
                     lock.release();
+                    if (log.isDebugEnabled()) {
+                        log.debug("zookeeper锁{}，解锁成功", key);
+                    }
                 }
             }
         } else {
