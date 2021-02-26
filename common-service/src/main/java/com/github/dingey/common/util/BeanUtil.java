@@ -13,9 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author ding
  * @since 2021/2/26
  */
+@SuppressWarnings("unused")
 public class BeanUtil {
     private static final Logger log = LoggerFactory.getLogger(BeanUtil.class);
-    private static final Map<Class<?>, SerializedLambda> CLASS_LAMDBA_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, SerializedLambda> lambdaClassCache = new ConcurrentHashMap<>();
 
     /***
      * 获取get方法引用的方法名
@@ -52,7 +53,7 @@ public class BeanUtil {
         return firstLower(methodName.replace("set", ""));
     }
 
-    public static String firstLower(String s) {
+    private static String firstLower(String s) {
         if (s == null || s.isEmpty()) {
             return s;
         }
@@ -63,15 +64,15 @@ public class BeanUtil {
      * 关键在于这个方法
      */
     public static SerializedLambda getSerializedLambda(Serializable fn) {
-        SerializedLambda lambda = CLASS_LAMDBA_CACHE.get(fn.getClass());
+        SerializedLambda lambda = lambdaClassCache.get(fn.getClass());
         if (lambda == null) {
             try {
                 Method method = fn.getClass().getDeclaredMethod("writeReplace");
                 method.setAccessible(Boolean.TRUE);
                 lambda = (SerializedLambda) method.invoke(fn);
-                CLASS_LAMDBA_CACHE.put(fn.getClass(), lambda);
+                lambdaClassCache.put(fn.getClass(), lambda);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage(),e);
             }
         }
         return lambda;
