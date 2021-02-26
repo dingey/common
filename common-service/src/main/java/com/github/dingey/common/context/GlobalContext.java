@@ -12,6 +12,7 @@ import java.util.Objects;
  */
 @SuppressWarnings("unused")
 public class GlobalContext {
+    public static final String HEADER_NAME = "g-c";
     private static final ThreadLocal<Map<String, String>> contextMap = new ThreadLocal<>();
 
     public static Map<String, String> getContextMap() {
@@ -41,7 +42,6 @@ public class GlobalContext {
         contextMap.remove();
     }
 
-    public static final String HEADER_NAME = "g-c";
 
     public static boolean hasContext() {
         return contextMap.get() != null && !contextMap.get().isEmpty();
@@ -52,7 +52,8 @@ public class GlobalContext {
     }
 
     static void setByJsonString(String jsonString) {
-        HashMap<String,String> map = JsonUtil.parseJson(jsonString, new TypeReference<HashMap<String, String>>() {});
+        HashMap<String, String> map = JsonUtil.parseJson(jsonString, new TypeReference<HashMap<String, String>>() {
+        });
         setContextMap(map);
     }
 }
