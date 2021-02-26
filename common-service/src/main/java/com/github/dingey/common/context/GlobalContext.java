@@ -1,5 +1,6 @@
 package com.github.dingey.common.context;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dingey.common.util.JsonUtil;
 
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Objects;
 /**
  * 全局上下文，会在远程调用中传递上下文信息
  */
+@SuppressWarnings("unused")
 public class GlobalContext {
     private static final ThreadLocal<Map<String, String>> contextMap = new ThreadLocal<>();
 
@@ -39,7 +41,7 @@ public class GlobalContext {
         contextMap.remove();
     }
 
-    static final String HEADER_NAME = "g-c";
+    public static final String HEADER_NAME = "g-c";
 
     public static boolean hasContext() {
         return contextMap.get() != null && !contextMap.get().isEmpty();
@@ -50,7 +52,7 @@ public class GlobalContext {
     }
 
     static void setByJsonString(String jsonString) {
-        HashMap map = JsonUtil.parseJson(jsonString, HashMap.class);
+        HashMap<String,String> map = JsonUtil.parseJson(jsonString, new TypeReference<HashMap<String, String>>() {});
         setContextMap(map);
     }
 }
