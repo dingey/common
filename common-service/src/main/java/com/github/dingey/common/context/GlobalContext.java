@@ -29,7 +29,7 @@ public class GlobalContext {
             map = new HashMap<>();
             setContextMap(map);
         }
-        map.putIfAbsent(key, value);
+        map.put(key, value);
     }
 
     public static String getValue(String key) {
