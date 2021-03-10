@@ -41,9 +41,19 @@ public class GlobalContext {
         return value == null ? defaultValue : value;
     }
 
+    public static Long getLong(String key) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? null : Long.parseLong(value);
+    }
+
     public static Long getLong(String key, long defaultValue) {
         String value = getValue(key);
         return (value == null || value.isEmpty()) ? defaultValue : Long.parseLong(value);
+    }
+
+    public static Integer getInteger(String key) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? null : Integer.parseInt(value);
     }
 
     public static Integer getInteger(String key, int defaultValue) {
