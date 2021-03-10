@@ -5,7 +5,6 @@ import com.github.dingey.common.util.JsonUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 全局上下文，会在远程调用中传递上下文信息
@@ -34,8 +33,22 @@ public class GlobalContext {
 
     public static String getValue(String key) {
         Map<String, String> map = getContextMap();
-        Objects.requireNonNull(map, "全局上下文变量未设置，请先设置在使用");
-        return map.get(key);
+        return map == null ? null : map.get(key);
+    }
+
+    public static String getValue(String key, String defaultValue) {
+        String value = getValue(key);
+        return value == null ? defaultValue : value;
+    }
+
+    public static Long getLong(String key, long defaultValue) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? defaultValue : Long.parseLong(value);
+    }
+
+    public static Integer getInteger(String key, int defaultValue) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? defaultValue : Integer.parseInt(value);
     }
 
     public static void clear() {
