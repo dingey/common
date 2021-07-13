@@ -43,7 +43,7 @@ abstract class AbstractLockAspect {
      */
     boolean tryLock(String key, long lockMillisecond) {
         String value = lockValue.get();
-        if (StringUtils.isEmpty(lockValue)) {
+        if (StringUtils.isEmpty(value)) {
             value = UUID.randomUUID().toString().replaceAll("-", "");
             lockValue.set(value);
         }
