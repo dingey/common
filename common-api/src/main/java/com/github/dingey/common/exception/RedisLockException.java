@@ -6,4 +6,7 @@ public class RedisLockException extends CommonException {
         super(message);
     }
 
+    public RedisLockException(Throwable cause) {
+        super(cause);
+    }
 }

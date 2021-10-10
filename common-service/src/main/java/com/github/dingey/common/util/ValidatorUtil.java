@@ -1,6 +1,7 @@
 package com.github.dingey.common.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintViolation;
@@ -12,6 +13,7 @@ import java.util.Set;
  * @author d
  */
 @Component
+@ConditionalOnClass(Validator.class)
 public class ValidatorUtil {
     private static Validator validator;
 

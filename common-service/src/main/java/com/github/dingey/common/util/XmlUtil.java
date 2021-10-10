@@ -1,6 +1,6 @@
 package com.github.dingey.common.util;
 
-import com.github.dingey.common.exception.XmException;
+import com.github.dingey.common.exception.XmlException;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -52,7 +52,7 @@ public class XmlUtil {
             marshaller.marshal(t, sw);
             return sw.toString();
         } catch (JAXBException e) {
-            throw new XmException(e);
+            throw new XmlException(e);
         }
     }
 
@@ -75,7 +75,7 @@ public class XmlUtil {
             Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(new StringReader(xml)));
             return (T) unmarshaller.unmarshal(xmlSource);
         } catch (Exception e) {
-            throw new XmException(e);
+            throw new XmlException(e);
         }
     }
 
@@ -105,7 +105,7 @@ public class XmlUtil {
                 return Collections.emptyMap();
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new XmlException(e);
         }
     }
 
@@ -154,7 +154,7 @@ public class XmlUtil {
             writer.close();
             return output;
         } catch (Exception e) {
-            throw new XmException(e);
+            throw new XmlException(e);
         }
     }
 
@@ -172,7 +172,7 @@ public class XmlUtil {
                         factory.setXIncludeAware(false);
                         factory.setExpandEntityReferences(false);
                     } catch (Exception e) {
-                        throw new XmException(e);
+                        throw new XmlException(e);
                     }
                 }
             }

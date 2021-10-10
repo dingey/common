@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings({"unused"})
-public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends BaseService<T,S>> extends AbstractServiceImpl<D, T> implements BaseService<T, S> {
+public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends BaseService<T,S>> extends AbstractCacheServiceImpl<D, T> implements BaseService<T, S> {
     @Autowired
     private S service;
 
@@ -20,7 +20,7 @@ public abstract class BaseServiceImpl<D extends BaseMapper<T>, T, S extends Base
         }
         List<T> list = new ArrayList<>();
         for (Serializable id : ids) {
-            T t = service.getCache(id);
+            T t = service.get(id);
             if (t != null) {
                 list.add(t);
             }

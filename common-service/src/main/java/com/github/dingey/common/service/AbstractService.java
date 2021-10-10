@@ -1,12 +1,11 @@
 package com.github.dingey.common.service;
 
-import com.github.dingey.common.Pager;
 import com.github.pagehelper.PageSerializable;
 
 import java.io.Serializable;
 import java.util.List;
 
-@SuppressWarnings({"rawtypes", "unused"})
+@SuppressWarnings({"unused"})
 public interface AbstractService<T> {
     /**
      * 根据主键查询
@@ -16,13 +15,13 @@ public interface AbstractService<T> {
      */
     T get(Serializable id);
 
-    /**
-     * 根据主键查询并缓存结果
-     *
-     * @param id 主键
-     * @return 一条记录
-     */
-    T getCache(Serializable id);
+//    /**
+//     * 根据主键查询并缓存结果
+//     *
+//     * @param id 主键
+//     * @return 一条记录
+//     */
+//    T getCache(Serializable id);
 
     /**
      * 查询一条记录,和entity字段值不为空相等的一条记录，大于1条报错
@@ -86,13 +85,13 @@ public interface AbstractService<T> {
      */
     int update(T entity);
 
-    /**
-     * 修改记录,并清除缓存
-     *
-     * @param entity 实体
-     * @return 影响的行数
-     */
-    int updateCache(T entity);
+//    /**
+//     * 修改记录,并清除缓存
+//     *
+//     * @param entity 实体
+//     * @return 影响的行数
+//     */
+//    int updateCache(T entity);
 
     /**
      * 删除记录
@@ -102,13 +101,13 @@ public interface AbstractService<T> {
      */
     int delete(Serializable id);
 
-    /**
-     * 删除记录并清空缓存
-     *
-     * @param id 主键
-     * @return 影响的行数
-     */
-    int deleteCache(Serializable id);
+//    /**
+//     * 删除记录并清空缓存
+//     *
+//     * @param id 主键
+//     * @return 影响的行数
+//     */
+//    int deleteCache(Serializable id);
 
     /**
      * 分页查询

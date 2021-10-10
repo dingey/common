@@ -1,5 +1,6 @@
 package com.github.dingey.common.cache;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -18,7 +19,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
-@ConditionalOnClass(RedisConnectionFactory.class)
+@ConditionalOnClass({RedisConnectionFactory.class, ProceedingJoinPoint.class})
 public class SpringCacheAutoConfiguration {
     @Primary
     @Bean

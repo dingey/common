@@ -1,21 +1,24 @@
 package com.github.dingey.common;
 
+import com.github.dingey.common.exception.CommonException;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.beans.Transient;
 
 @SuppressWarnings({"unused"})
 public class Result<T> {
-    @ApiModelProperty("0成功|1失败|2服务器异常")
+    @ApiModelProperty("0成功|1失败|401未授权|403拒绝访问|500服务器异常")
     private int code;
-    private String msg;
+    private String message;
     private T data;
 
     public Result() {
         super();
     }
 
-    private Result(int code, String msg, T data) {
+    private Result(int code, String message, T data) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
         this.data = data;
     }
 
@@ -35,11 +38,11 @@ public class Result<T> {
         return new Result<>(ResultCode.DefaultResultCode.ERROR.getCode(), msg, null);
     }
 
-    public static <T> Result<T> code(int code, String msg) {
-        return new Result<>(code, msg, null);
+    public static <T> Result<T> build(int code, String message) {
+        return new Result<>(code, message, null);
     }
 
-    public static <T> Result<T> code(ResultCode resultCode) {
+    public static <T> Result<T> build(ResultCode resultCode) {
         return new Result<>(resultCode.getCode(), resultCode.getMessage(), null);
     }
 
@@ -52,12 +55,12 @@ public class Result<T> {
         return this;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getMessage() {
+        return message;
     }
 
-    public Result<T> setMsg(String msg) {
-        this.msg = msg;
+    public Result<T> setMessage(String message) {
+        this.message = message;
         return this;
     }
 
@@ -68,5 +71,25 @@ public class Result<T> {
     public Result<T> setData(T data) {
         this.data = data;
         return this;
+    }
+
+    /**
+     * 判断结果是否成功
+     *
+     * @return true成功|false失败
+     */
+    @Transient
+    public boolean isSuccess() {
+        return 0 == code;
+    }
+
+    /**
+     * 断言结果是否成功，不成功会抛异常
+     */
+    @Transient
+    public void assertSuccess() {
+        if (!isSuccess()) {
+            throw new CommonException(this.getMessage()).setCode(this.getCode());
+        }
     }
 }

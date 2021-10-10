@@ -1,15 +1,17 @@
 package com.github.dingey.common.context;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dingey.common.util.JsonUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 全局上下文，会在远程调用中传递上下文信息
  */
+@SuppressWarnings("unused")
 public class GlobalContext {
+    public static final String HEADER_NAME = "g-c";
     private static final ThreadLocal<Map<String, String>> contextMap = new ThreadLocal<>();
 
     public static Map<String, String> getContextMap() {
@@ -26,20 +28,43 @@ public class GlobalContext {
             map = new HashMap<>();
             setContextMap(map);
         }
-        map.putIfAbsent(key, value);
+        map.put(key, value);
     }
 
     public static String getValue(String key) {
         Map<String, String> map = getContextMap();
-        Objects.requireNonNull(map, "全局上下文变量未设置，请先设置在使用");
-        return map.get(key);
+        return map == null ? null : map.get(key);
+    }
+
+    public static String getValue(String key, String defaultValue) {
+        String value = getValue(key);
+        return value == null ? defaultValue : value;
+    }
+
+    public static Long getLong(String key) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? null : Long.parseLong(value);
+    }
+
+    public static Long getLong(String key, long defaultValue) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? defaultValue : Long.parseLong(value);
+    }
+
+    public static Integer getInteger(String key) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? null : Integer.parseInt(value);
+    }
+
+    public static Integer getInteger(String key, int defaultValue) {
+        String value = getValue(key);
+        return (value == null || value.isEmpty()) ? defaultValue : Integer.parseInt(value);
     }
 
     public static void clear() {
         contextMap.remove();
     }
 
-    static final String HEADER_NAME = "g-c";
 
     public static boolean hasContext() {
         return contextMap.get() != null && !contextMap.get().isEmpty();
@@ -50,7 +75,8 @@ public class GlobalContext {
     }
 
     static void setByJsonString(String jsonString) {
-        HashMap map = JsonUtil.parseJson(jsonString, HashMap.class);
+        HashMap<String, String> map = JsonUtil.parseJson(jsonString, new TypeReference<HashMap<String, String>>() {
+        });
         setContextMap(map);
     }
 }

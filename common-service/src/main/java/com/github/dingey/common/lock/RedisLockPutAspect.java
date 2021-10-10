@@ -10,6 +10,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,14 @@ import java.lang.reflect.Method;
 
 /**
  * redis锁
+ *
+ * @author d
  */
 @Aspect
 @Component
-@ConditionalOnClass(StringRedisTemplate.class)
-public class RedisLockPutAspect extends AbstractLockAspect {
+@ConditionalOnClass({StringRedisTemplate.class, ProceedingJoinPoint.class})
+@ConditionalOnProperty(value = "common.lock.aop.enable", havingValue = "true", matchIfMissing = true)
+class RedisLockPutAspect extends AbstractLockAspect {
     private final Logger log = LoggerFactory.getLogger(RedisLockPutAspect.class);
 
     @PostConstruct
@@ -45,7 +49,7 @@ public class RedisLockPutAspect extends AbstractLockAspect {
                     return pjp.proceed();
                 } finally {
                     if (redisLock.timelock() == 0L) {
-                        unLock(key);
+                        unlock(key);
                     }
                 }
             }

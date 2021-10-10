@@ -9,6 +9,8 @@ public interface ResultCode {
         OK(0, "ok"),
         SUCCESS(0, "success"),
         FAIL(1, "fail"),
+        UNAUTHORIZED(401, "unauthorized"),
+        FORBIDDEN(403, "forbidden"),
         ERROR(500, "error"),
         ;
         int code;
@@ -21,12 +23,12 @@ public interface ResultCode {
 
         @Override
         public int getCode() {
-            return 0;
+            return code;
         }
 
         @Override
         public String getMessage() {
-            return null;
+            return message;
         }
     }
 }

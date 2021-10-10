@@ -1,5 +1,7 @@
 package com.github.dingey.common;
 
+import com.github.dingey.common.exception.CommonException;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -43,7 +45,7 @@ public class Pager<T> {
             p.setTotal(total);
             return p;
         } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new CommonException(e);
         }
     }
 }
