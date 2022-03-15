@@ -109,12 +109,4 @@ public interface AbstractService<T> {
 //     */
 //    int deleteCache(Serializable id);
 
-    /**
-     * 分页查询
-     *
-     * @param pageNum  页码
-     * @param pageSize 大小
-     * @return 分页数据
-     */
-    PageSerializable<T> page(T t, int pageNum, int pageSize);
 }
