@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class GlobalContext {
-    public static final String HEADER_NAME = "g-c";
+    public static final String HEADER_NAME = "ctx";
     private static final ThreadLocal<Map<String, String>> contextMap = new ThreadLocal<>();
 
     public static Map<String, String> getContextMap() {

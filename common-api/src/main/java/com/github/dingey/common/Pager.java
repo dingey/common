@@ -1,11 +1,5 @@
 package com.github.dingey.common;
 
-import com.github.dingey.common.exception.CommonException;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings({"unused"})
@@ -29,23 +23,10 @@ public class Pager<T> {
         this.total = total;
     }
 
-    public static <P, T> Pager<T> of(P pager) {
-        try {
-            Pager<T> p = new Pager<>();
-            if (pager == null) {
-                p.setList(Collections.emptyList());
-                return p;
-            }
-            PropertyDescriptor listProperty = new PropertyDescriptor("list", pager.getClass());
-            @SuppressWarnings("unchecked")
-            List<T> invoke = (List<T>) listProperty.getReadMethod().invoke(pager, (Object[]) null);
-            p.setList(invoke);
-            PropertyDescriptor totalProperty = new PropertyDescriptor("total", pager.getClass());
-            Long total = (Long) totalProperty.getReadMethod().invoke(pager, (Object[]) null);
-            p.setTotal(total);
-            return p;
-        } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
-            throw new CommonException(e);
-        }
+    public static <T> Pager<T> of(List<T> list, long total) {
+        Pager<T> pager = new Pager<>();
+        pager.setList(list);
+        pager.setTotal(total);
+        return pager;
     }
 }

@@ -6,7 +6,7 @@ import com.github.dingey.common.ResultCode;
  * @author d
  */
 public class CommonException extends RuntimeException {
-    private int code = ResultCode.DefaultResultCode.ERROR.getCode();
+    private int code = ResultCode.DefaultResultCode.FAIL.getCode();
 
     public CommonException() {
     }
@@ -22,6 +22,11 @@ public class CommonException extends RuntimeException {
     public CommonException(Throwable cause) {
         super(cause);
 
+    }
+
+    public CommonException(ResultCode resultCode) {
+        super(resultCode.getMessage());
+        setCode(resultCode.getCode());
     }
 
     public int getCode() {

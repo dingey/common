@@ -5,12 +5,12 @@ import org.springframework.util.DigestUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -31,46 +31,60 @@ public class EncryptUtil {
         }
     }
 
+    private static Key generateKey(String password) throws Exception {
+        DESKeySpec dks = new DESKeySpec(password.getBytes(StandardCharsets.UTF_8));
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+        return keyFactory.generateSecret(dks);
+    }
+
     /**
-     * 加密
+     * DES加密字符串
      *
-     * @param datasource byte[] 源
-     * @param password   密钥
-     * @return byte[] 密文
+     * @param password 加密密码，长度不能够小于8位
+     * @param data     待加密字符串
+     * @return 加密后内容
      */
-    public static byte[] encryptDes(byte[] datasource, String password) {
+    public static String encryptDes(String password, String data) {
+        if (password == null || password.length() < 8) {
+            throw new RuntimeException("加密失败，key不能小于8位");
+        }
+        if (data == null)
+            return null;
         try {
-            Cipher cipher = getCipher(password);
-            return cipher.doFinal(datasource);
-        } catch (Throwable e) {
-            throw new EncryptException(e);
+            Key secretKey = generateKey(password);
+            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+            IvParameterSpec iv = new IvParameterSpec("12345678".getBytes(StandardCharsets.UTF_8));
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
+            byte[] bytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return new String(Base64.getUrlEncoder().withoutPadding().encode(bytes));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return data;
         }
     }
 
-    private static Cipher getCipher(String password) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
-        SecureRandom random = new SecureRandom();
-        DESKeySpec desKey = new DESKeySpec(password.getBytes());
-        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-        SecretKey securekey = keyFactory.generateSecret(desKey);
-        Cipher cipher = Cipher.getInstance("DES");
-        cipher.init(Cipher.ENCRYPT_MODE, securekey, random);
-        return cipher;
-    }
-
     /**
-     * 解密
+     * DES解密字符串
      *
-     * @param src      byte[] 密文源
-     * @param password 密钥
-     * @return byte[] 明文
-     * @throws EncryptException 加密异常
+     * @param password 解密密码，长度不能够小于8位
+     * @param data     待解密字符串
+     * @return 解密后内容
      */
-    public static byte[] decryptDes(byte[] src, String password) throws EncryptException {
+    public static String decryptDes(String password, String data) {
+        if (password == null || password.length() < 8) {
+            throw new RuntimeException("加密失败，key不能小于8位");
+        }
+        if (data == null)
+            return null;
         try {
-            Cipher cipher = getCipher(password);
-            return cipher.doFinal(src);
-        } catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
-            throw new EncryptException(e);
+            Key secretKey = generateKey(password);
+            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+            IvParameterSpec iv = new IvParameterSpec("12345678".getBytes(StandardCharsets.UTF_8));
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+            return new String(cipher.doFinal(Base64.getUrlDecoder().decode(data.getBytes(StandardCharsets.UTF_8))), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return data;
         }
     }
 

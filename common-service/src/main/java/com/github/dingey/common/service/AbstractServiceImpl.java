@@ -1,8 +1,6 @@
 package com.github.dingey.common.service;
 
 import com.github.dingey.mybatis.mapper.BaseMapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageSerializable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -91,12 +89,6 @@ public abstract class AbstractServiceImpl<D extends BaseMapper<T>, T> implements
 //    public int deleteCache(Serializable id) {
 //        return mapper.deleteById(id);
 //    }
-
-    @Override
-    public PageSerializable<T> page(T t, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        return new PageSerializable<>(mapper.list(t));
-    }
 
     public D getMapper() {
         return mapper;
